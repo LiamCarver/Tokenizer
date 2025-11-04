@@ -39,7 +39,6 @@ internal class Tokenizer
             }
         }
 
-        // ✅ Add the final token if it was not part of a merge
         if (index == currentTokens.Length - 1)
         {
             newTokens.Add(currentTokens[index]);
