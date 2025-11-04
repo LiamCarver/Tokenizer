@@ -1,0 +1,70 @@
+## Build / Publish Output
+bin/
+obj/
+out/
+
+## User-specific files
+*.user
+*.suo
+*.userprefs
+
+## IDE-specific
+# Visual Studio
+.vs/
+*.vc.db
+*.vc.opendb
+
+# Rider / JetBrains
+.idea/
+
+# VS Code settings
+.vscode/
+
+## Logs / crash dumps
+*.log
+*.tlog
+
+## NuGet
+*.nupkg
+# package restore
+packages/
+# optional: if you are using package reference restore (default), keep packages folder ignored
+# NuGet v3 store
+~/.nuget/packages
+
+## Dotnet CLI
+.project.lock.json
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Generated files
+*.dll
+*.exe
+*.mdb
+*.pdb
+*.db
+
+## ASP.NET
+App_Data/
+appsettings.*.json
+
+## Backup & temp files
+*~
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+
+## Resharper
+_ReSharper*/
+resharper.xml
+*.DotSettings.user
+
+## Test results
+TestResult*/
+*.TestResult.xml
+coverage*.xml
+*.coverage
+*.coveragexml
