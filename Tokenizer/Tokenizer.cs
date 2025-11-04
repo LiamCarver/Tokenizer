@@ -12,7 +12,7 @@ internal class Tokenizer
         var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
     }
 
-    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<Tuple<string, string>, int> tokenWithMaximumCount, string[] currentTokens)
+    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<(string, string), int> tokenWithMaximumCount, string[] currentTokens)
     {
         var firstTokenToMatch = tokenWithMaximumCount.Key.Item1;
         var nextTokenToMatch = tokenWithMaximumCount.Key.Item2;
@@ -49,22 +49,22 @@ internal class Tokenizer
     }
 
 
-    private static KeyValuePair<Tuple<string, string>, int> FindMostFrequentPair(Dictionary<Tuple<string, string>, int> pairFrequencies)
+    private static KeyValuePair<(string, string), int> FindMostFrequentPair(Dictionary<(string, string), int> pairFrequencies)
     {
         var maximumFrequencyCount = pairFrequencies.Max(token => token.Value);
         return pairFrequencies.First(pair => pair.Value == maximumFrequencyCount);
     }
 
-    private static Dictionary<Tuple<string, string>, int> CountPairFrequencies(string[] tokens)
+    private static Dictionary<(string, string), int> CountPairFrequencies(string[] tokens)
     {
-        Dictionary<Tuple<string, string>, int> pairFrequencies = [];
+        Dictionary<(string, string), int> pairFrequencies = [];
         
         for (var index = 0; index < tokens.Length - 1; index++)
         {
             var currentToken = tokens[index];
             var nextToken = tokens[index + 1];
 
-            var tokenPair = new Tuple<string, string>(currentToken, nextToken);
+            var tokenPair = (currentToken, nextToken);
 
             if (pairFrequencies.TryGetValue(tokenPair, out var frequency))
             {
