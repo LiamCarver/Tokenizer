@@ -1,22 +1,18 @@
-﻿using Newtonsoft.Json;
-
-namespace Tokenizer;
+﻿namespace Tokenizer;
 
 internal class Tokenizer
 {
     public void Tokenize(string input)
     {
-        var originalVocabulary = input.ToCharArray().Select(character => character.ToString()).ToArray();
-        var characterPairFrequencies = GetAdjacentCharacterPairFrequencies(originalVocabulary);
+        var tokens = input.ToCharArray().Select(character => character.ToString()).ToArray();
+        var pairFrequencies = CountPairFrequencies(tokens);
 
-        var tokenWithMaximumCount = GetTokenWithMaximumCount(characterPairFrequencies);
+        var tokenWithMaximumCount = FindMostFrequentPair(pairFrequencies);
 
-        var newVocabulary = GetUpdatedVocabulary(tokenWithMaximumCount, originalVocabulary);
-
-        var sanityCheck = JsonConvert.SerializeObject(newVocabulary, Formatting.Indented);
+        var newTokens = MergeMostFrequentPairInSequence(tokenWithMaximumCount, tokens);
     }
 
-    private static string[] GetUpdatedVocabulary(KeyValuePair<Tuple<string, string>, int> tokenWithMaximumCount, string[] currentVocabulary)
+    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<Tuple<string, string>, int> tokenWithMaximumCount, string[] currentVocabulary)
     {
         var firstTokenToMatch = tokenWithMaximumCount.Key.Item1;
         var nextTokenToMatch = tokenWithMaximumCount.Key.Item2;
@@ -53,15 +49,15 @@ internal class Tokenizer
     }
 
 
-    private static KeyValuePair<Tuple<string, string>, int> GetTokenWithMaximumCount(Dictionary<Tuple<string, string>, int> characterPairFrequencies)
+    private static KeyValuePair<Tuple<string, string>, int> FindMostFrequentPair(Dictionary<Tuple<string, string>, int> pairFrequencies)
     {
-        var maximumFrequencyCount = characterPairFrequencies.Max(token => token.Value);
-        return characterPairFrequencies.First(pair => pair.Value == maximumFrequencyCount);
+        var maximumFrequencyCount = pairFrequencies.Max(token => token.Value);
+        return pairFrequencies.First(pair => pair.Value == maximumFrequencyCount);
     }
 
-    private static Dictionary<Tuple<string, string>, int> GetAdjacentCharacterPairFrequencies(string[] tokens)
+    private static Dictionary<Tuple<string, string>, int> CountPairFrequencies(string[] tokens)
     {
-        Dictionary<Tuple<string, string>, int> adjacentCharacterFrequencies = [];
+        Dictionary<Tuple<string, string>, int> pairFrequencies = [];
         
         for (var index = 0; index < tokens.Length - 1; index++)
         {
@@ -70,16 +66,16 @@ internal class Tokenizer
 
             var tokenPair = new Tuple<string, string>(currentToken, nextToken);
 
-            if (adjacentCharacterFrequencies.TryGetValue(tokenPair, out var frequency))
+            if (pairFrequencies.TryGetValue(tokenPair, out var frequency))
             {
-                adjacentCharacterFrequencies[tokenPair] = frequency + 1;
+                pairFrequencies[tokenPair] = frequency + 1;
             }
             else
             {
-                adjacentCharacterFrequencies[tokenPair] = 1;
+                pairFrequencies[tokenPair] = 1;
             }
         }
 
-        return adjacentCharacterFrequencies;
+        return pairFrequencies;
     }
 }
