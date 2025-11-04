@@ -7,45 +7,45 @@ internal class Tokenizer
         var tokens = input.ToCharArray().Select(character => character.ToString()).ToArray();
         var pairFrequencies = CountPairFrequencies(tokens);
 
-        var tokenWithMaximumCount = FindMostFrequentPair(pairFrequencies);
+        var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
 
-        var newTokens = MergeMostFrequentPairInSequence(tokenWithMaximumCount, tokens);
+        var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
     }
 
-    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<Tuple<string, string>, int> tokenWithMaximumCount, string[] currentVocabulary)
+    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<Tuple<string, string>, int> tokenWithMaximumCount, string[] currentTokens)
     {
         var firstTokenToMatch = tokenWithMaximumCount.Key.Item1;
         var nextTokenToMatch = tokenWithMaximumCount.Key.Item2;
 
         var newMergedToken = string.Concat(firstTokenToMatch, nextTokenToMatch);
-        var newVocabulary = new List<string>();
+        var newTokens = new List<string>();
 
         var index = 0;
 
-        while (index < currentVocabulary.Length - 1)
+        while (index < currentTokens.Length - 1)
         {
-            var currentToken = currentVocabulary[index];
-            var nextToken = currentVocabulary[index + 1];
+            var currentToken = currentTokens[index];
+            var nextToken = currentTokens[index + 1];
 
             if (currentToken == firstTokenToMatch && nextToken == nextTokenToMatch)
             {
-                newVocabulary.Add(newMergedToken);
+                newTokens.Add(newMergedToken);
                 index += 2;
             }
             else
             {
-                newVocabulary.Add(currentToken);
+                newTokens.Add(currentToken);
                 index++;
             }
         }
 
         // ✅ Add the final token if it was not part of a merge
-        if (index == currentVocabulary.Length - 1)
+        if (index == currentTokens.Length - 1)
         {
-            newVocabulary.Add(currentVocabulary[index]);
+            newTokens.Add(currentTokens[index]);
         }
 
-        return newVocabulary.ToArray();
+        return newTokens.ToArray();
     }
 
 
