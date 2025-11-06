@@ -11,6 +11,8 @@ internal class Tokenizer
         var vocabulary = new HashSet<string>(tokens);
         var targetVocabularyLength = 50;
 
+        var mergeRules = new List<(string Left, string Right)>();
+
         while (vocabulary.Count < targetVocabularyLength)
         {
             var pairFrequencies = CountPairFrequencies(tokens);
@@ -21,11 +23,14 @@ internal class Tokenizer
 
             tokens = newTokens;
 
+            mergeRules.Add(mostFrequentPair.Key);
+
             var newMergedToken = string.Concat(mostFrequentPair.Key.Item1, mostFrequentPair.Key.Item2);
             vocabulary.Add(newMergedToken);
         }
 
         var check = JsonConvert.SerializeObject(vocabulary, Formatting.Indented);
+        var check2 = JsonConvert.SerializeObject(mergeRules, Formatting.Indented);
     }
 
     private static string[] MergeMostFrequentPairInSequence(KeyValuePair<(string, string), int> tokenWithMaximumCount, string[] currentTokens)
