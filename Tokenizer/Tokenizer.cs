@@ -10,7 +10,7 @@ internal class Tokenizer
         var bytes = Encoding.UTF8.GetBytes(input);
         var tokens = bytes.Select(b => new byte[] { b }).ToList();
 
-        var vocabulary = new HashSet<byte[]>();
+        var vocabulary = new HashSet<byte[]>(tokens);
         var targetVocabularyLength = 1;
 
         var mergeRules = new List<(string Left, string Right)>();
@@ -18,37 +18,40 @@ internal class Tokenizer
         while (vocabulary.Count < targetVocabularyLength)
         {
             var pairFrequencies = CountPairFrequencies(tokens);
-            vocabulary.Add([]);
 
-            //var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
+            var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
 
-            //var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
+            var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
 
-            //tokens = newTokens;
+            tokens = newTokens;
 
             //mergeRules.Add(mostFrequentPair.Key);
 
-            //var newMergedToken = string.Concat(mostFrequentPair.Key.Item1, mostFrequentPair.Key.Item2);
-            //vocabulary.Add(newMergedToken);
+            var newMergedToken = mostFrequentPair.Key.Item1.Concat(mostFrequentPair.Key.Item2).ToArray();
+
+            vocabulary.Add(newMergedToken);
         }
     }
 
-    private static string[] MergeMostFrequentPairInSequence(KeyValuePair<(string, string), int> tokenWithMaximumCount, string[] currentTokens)
+    private static List<byte[]> MergeMostFrequentPairInSequence(KeyValuePair<(byte[], byte[]), int> tokenWithMaximumCount, List<byte[]> currentTokens)
     {
         var firstTokenToMatch = tokenWithMaximumCount.Key.Item1;
         var nextTokenToMatch = tokenWithMaximumCount.Key.Item2;
 
-        var newMergedToken = string.Concat(firstTokenToMatch, nextTokenToMatch);
-        var newTokens = new List<string>();
+        var newMergedToken = firstTokenToMatch.Concat(nextTokenToMatch).ToArray();
+        var newTokens = new List<byte[]>();
 
         var index = 0;
 
-        while (index < currentTokens.Length - 1)
+        var equalityComparer = new ByteArrayComparer();
+        equalityComparer.Equals(firstTokenToMatch, nextTokenToMatch);
+
+        while (index < currentTokens.Count - 1)
         {
             var currentToken = currentTokens[index];
             var nextToken = currentTokens[index + 1];
 
-            if (currentToken == firstTokenToMatch && nextToken == nextTokenToMatch)
+            if (equalityComparer.Equals(currentToken, firstTokenToMatch) && equalityComparer.Equals(nextToken, nextTokenToMatch))
             {
                 newTokens.Add(newMergedToken);
                 index += 2;
@@ -60,16 +63,16 @@ internal class Tokenizer
             }
         }
 
-        if (index == currentTokens.Length - 1)
+        if (index == currentTokens.Count - 1)
         {
             newTokens.Add(currentTokens[index]);
         }
 
-        return newTokens.ToArray();
+        return newTokens;
     }
 
 
-    private static KeyValuePair<(string, string), int> FindMostFrequentPair(Dictionary<(string, string), int> pairFrequencies)
+    private static KeyValuePair<(byte[], byte[]), int> FindMostFrequentPair(Dictionary<(byte[], byte[]), int> pairFrequencies)
     {
         var maximumFrequencyCount = pairFrequencies.Max(token => token.Value);
         return pairFrequencies.First(pair => pair.Value == maximumFrequencyCount);
