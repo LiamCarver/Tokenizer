@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text;
+using Newtonsoft.Json;
 
 namespace Tokenizer;
 
@@ -6,31 +7,30 @@ internal class Tokenizer
 {
     public void Tokenize(string input)
     {
-        var tokens = input.ToCharArray().Select(character => character.ToString()).ToArray();
-        
-        var vocabulary = new HashSet<string>(tokens);
-        var targetVocabularyLength = 50;
+        var bytes = Encoding.UTF8.GetBytes(input);
+        var tokens = bytes.Select(b => new byte[] { b }).ToList();
+
+        var vocabulary = new HashSet<byte[]>();
+        var targetVocabularyLength = 1;
 
         var mergeRules = new List<(string Left, string Right)>();
 
         while (vocabulary.Count < targetVocabularyLength)
         {
             var pairFrequencies = CountPairFrequencies(tokens);
+            vocabulary.Add([]);
 
-            var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
+            //var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
 
-            var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
+            //var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
 
-            tokens = newTokens;
+            //tokens = newTokens;
 
-            mergeRules.Add(mostFrequentPair.Key);
+            //mergeRules.Add(mostFrequentPair.Key);
 
-            var newMergedToken = string.Concat(mostFrequentPair.Key.Item1, mostFrequentPair.Key.Item2);
-            vocabulary.Add(newMergedToken);
+            //var newMergedToken = string.Concat(mostFrequentPair.Key.Item1, mostFrequentPair.Key.Item2);
+            //vocabulary.Add(newMergedToken);
         }
-
-        var check = JsonConvert.SerializeObject(vocabulary, Formatting.Indented);
-        var check2 = JsonConvert.SerializeObject(mergeRules, Formatting.Indented);
     }
 
     private static string[] MergeMostFrequentPairInSequence(KeyValuePair<(string, string), int> tokenWithMaximumCount, string[] currentTokens)
@@ -75,11 +75,11 @@ internal class Tokenizer
         return pairFrequencies.First(pair => pair.Value == maximumFrequencyCount);
     }
 
-    private static Dictionary<(string, string), int> CountPairFrequencies(string[] tokens)
+    private static Dictionary<(byte[], byte[]), int> CountPairFrequencies(List<byte[]> tokens)
     {
-        Dictionary<(string, string), int> pairFrequencies = [];
+        Dictionary<(byte[], byte[]), int> pairFrequencies = new(new ByteArrayPairComparer());
         
-        for (var index = 0; index < tokens.Length - 1; index++)
+        for (var index = 0; index < tokens.Count - 1; index++)
         {
             var currentToken = tokens[index];
             var nextToken = tokens[index + 1];
