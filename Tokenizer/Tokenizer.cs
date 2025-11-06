@@ -10,26 +10,17 @@ internal class Tokenizer
         var bytes = Encoding.UTF8.GetBytes(input);
         var tokens = bytes.Select(b => new byte[] { b }).ToList();
 
-        var vocabulary = new HashSet<byte[]>(tokens);
-        var targetVocabularyLength = 1;
+        var mergeRules = new List<(byte[] Left, byte[] Right)>();
+        var targetMergeCount = 50;
 
-        var mergeRules = new List<(string Left, string Right)>();
-
-        while (vocabulary.Count < targetVocabularyLength)
+        while (mergeRules.Count < targetMergeCount)
         {
             var pairFrequencies = CountPairFrequencies(tokens);
-
             var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
 
-            var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
+            tokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
 
-            tokens = newTokens;
-
-            //mergeRules.Add(mostFrequentPair.Key);
-
-            var newMergedToken = mostFrequentPair.Key.Item1.Concat(mostFrequentPair.Key.Item2).ToArray();
-
-            vocabulary.Add(newMergedToken);
+            mergeRules.Add(mostFrequentPair.Key);
         }
     }
 
@@ -43,15 +34,12 @@ internal class Tokenizer
 
         var index = 0;
 
-        var equalityComparer = new ByteArrayComparer();
-        equalityComparer.Equals(firstTokenToMatch, nextTokenToMatch);
-
         while (index < currentTokens.Count - 1)
         {
             var currentToken = currentTokens[index];
             var nextToken = currentTokens[index + 1];
 
-            if (equalityComparer.Equals(currentToken, firstTokenToMatch) && equalityComparer.Equals(nextToken, nextTokenToMatch))
+            if (currentToken.SequenceEqual(firstTokenToMatch) && nextToken.SequenceEqual(nextTokenToMatch))
             {
                 newTokens.Add(newMergedToken);
                 index += 2;
