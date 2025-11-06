@@ -1,15 +1,31 @@
-﻿namespace Tokenizer;
+﻿using Newtonsoft.Json;
+
+namespace Tokenizer;
 
 internal class Tokenizer
 {
     public void Tokenize(string input)
     {
         var tokens = input.ToCharArray().Select(character => character.ToString()).ToArray();
-        var pairFrequencies = CountPairFrequencies(tokens);
+        
+        var vocabulary = new HashSet<string>(tokens);
+        var targetVocabularyLength = 50;
 
-        var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
+        while (vocabulary.Count < targetVocabularyLength)
+        {
+            var pairFrequencies = CountPairFrequencies(tokens);
 
-        var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
+            var mostFrequentPair = FindMostFrequentPair(pairFrequencies);
+
+            var newTokens = MergeMostFrequentPairInSequence(mostFrequentPair, tokens);
+
+            tokens = newTokens;
+
+            var newMergedToken = string.Concat(mostFrequentPair.Key.Item1, mostFrequentPair.Key.Item2);
+            vocabulary.Add(newMergedToken);
+        }
+
+        var check = JsonConvert.SerializeObject(vocabulary, Formatting.Indented);
     }
 
     private static string[] MergeMostFrequentPairInSequence(KeyValuePair<(string, string), int> tokenWithMaximumCount, string[] currentTokens)
