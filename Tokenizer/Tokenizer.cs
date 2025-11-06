@@ -11,7 +11,7 @@ internal class Tokenizer
         var tokens = bytes.Select(b => new byte[] { b }).ToList();
 
         var mergeRules = new List<(byte[] Left, byte[] Right)>();
-        var targetMergeCount = 50;
+        var targetMergeCount = 10;
 
         while (mergeRules.Count < targetMergeCount)
         {
@@ -22,6 +22,21 @@ internal class Tokenizer
 
             mergeRules.Add(mostFrequentPair.Key);
         }
+
+        var readableMergeRules = mergeRules
+        .Select(rule => new
+        {
+            Left = DisplayToken(rule.Left),
+            Right = DisplayToken(rule.Right),
+            Merged = DisplayToken(rule.Left.Concat(rule.Right).ToArray())
+        });
+
+        var check = JsonConvert.SerializeObject(readableMergeRules, Formatting.Indented);
+    }
+
+    private static string DisplayToken(byte[] token)
+    {
+        return Encoding.UTF8.GetString(token);
     }
 
     private static List<byte[]> MergeMostFrequentPairInSequence(KeyValuePair<(byte[], byte[]), int> tokenWithMaximumCount, List<byte[]> currentTokens)
